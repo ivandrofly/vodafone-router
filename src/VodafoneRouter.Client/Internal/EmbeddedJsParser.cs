@@ -39,6 +39,7 @@ public static class EmbeddedJsParser
             sb.AppendLine(m.Groups["body"].Value);
             sb.AppendLine();
         }
+
         return sb.ToString();
     }
 
@@ -92,6 +93,7 @@ public static class EmbeddedJsParser
                 result[name] = null;
             }
         }
+
         return result;
     }
 
@@ -184,10 +186,11 @@ public static class EmbeddedJsParser
         {
             var d = value.AsNumber();
             if (Math.Truncate(d) == d && !double.IsInfinity(d)
-                && d >= long.MinValue && d <= long.MaxValue)
+                                      && d >= long.MinValue && d <= long.MaxValue)
                 return (long)d;
             return d;
         }
+
         if (value.IsString()) return value.AsString();
         if (value is JsArray arr)
         {
@@ -197,6 +200,7 @@ public static class EmbeddedJsParser
                 list.Add(ToClr(arr[i]));
             return list;
         }
+
         if (value is ObjectInstance obj)
         {
             var dict = new Dictionary<string, object?>(StringComparer.Ordinal);
@@ -208,8 +212,10 @@ public static class EmbeddedJsParser
                 if (prop is null) continue;
                 dict[k] = ToClr(prop.Value);
             }
+
             return dict;
         }
+
         return value.ToString();
     }
 
@@ -245,6 +251,7 @@ public static class EmbeddedJsParser
         {
             if (item is Dictionary<string, object?> d) result.Add(d);
         }
+
         return result;
     }
 }

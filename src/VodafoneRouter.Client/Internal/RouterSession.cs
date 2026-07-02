@@ -85,6 +85,7 @@ internal sealed class RouterSession : IDisposable
             IsAuthenticated = true;
             return;
         }
+
         if (body.Contains("login.asp", StringComparison.OrdinalIgnoreCase))
             throw new VodafoneRouterAuthException(
                 "Login failed: invalid credentials or router lockout (3 failed attempts triggers a temporary block).");
@@ -103,8 +104,14 @@ internal sealed class RouterSession : IDisposable
             // The UI POSTs to /logout.cgi without parameters; some firmware also accepts GET.
             using var resp = await _http.PostAsync("/logout.cgi", new StringContent(""), ct).ConfigureAwait(false);
         }
-        catch { /* logout is best-effort */ }
-        finally { IsAuthenticated = false; }
+        catch
+        {
+            /* logout is best-effort */
+        }
+        finally
+        {
+            IsAuthenticated = false;
+        }
     }
 
     public async Task<string> GetTokenAsync(CancellationToken ct)
@@ -141,6 +148,7 @@ internal sealed class RouterSession : IDisposable
             sb.AppendLine(await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
             sb.AppendLine();
         }
+
         return sb.ToString();
     }
 
@@ -169,7 +177,8 @@ internal sealed class RouterSession : IDisposable
             ["x.X_HW_Token"] = token,
         };
         if (extra is not null)
-            foreach (var kv in extra) form[kv.Key] = kv.Value;
+            foreach (var kv in extra)
+                form[kv.Key] = kv.Value;
 
         var url = $"/set.cgi?x={Uri.EscapeDataString(tr069Path)}&RequestFile={Uri.EscapeDataString(requestFile)}";
         using var resp = await PostFormCoreAsync(url, form, referer: "/" + requestFile, ct).ConfigureAwait(false);

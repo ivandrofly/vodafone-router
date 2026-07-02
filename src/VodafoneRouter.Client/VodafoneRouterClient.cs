@@ -20,7 +20,9 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
     private readonly RouterSession _session;
 
     public VodafoneRouterClient(string baseUrl = "http://192.168.1.1/", string language = "english", HttpClient? httpClient = null)
-        : this(new Uri(baseUrl, UriKind.Absolute), language, httpClient) { }
+        : this(new Uri(baseUrl, UriKind.Absolute), language, httpClient)
+    {
+    }
 
     public VodafoneRouterClient(Uri baseUrl, string language = "english", HttpClient? httpClient = null)
     {
@@ -44,7 +46,7 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
     {
         var indexHtml = await _session.GetHtmlAsync("/index.asp", ct).ConfigureAwait(false);
         var wanScript = await _session.GetConcatenatedAsync(
-            new[] { "/html/bbsp/common/wan_list_info.asp", "/html/bbsp/common/wan_list.asp" }, ct)
+                new[] { "/html/bbsp/common/wan_list_info.asp", "/html/bbsp/common/wan_list.asp" }, ct)
             .ConfigureAwait(false);
 
         var indexJs = EmbeddedJsParser.ExtractInlineScripts(indexHtml);
@@ -69,7 +71,7 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
         var internetWan = EmbeddedJsParser.AsRecords(vars.GetValueOrDefault("WanList"))
             .FirstOrDefault(r =>
                 (EmbeddedJsParser.Str(r.GetValueOrDefault("ServiceList")) ?? "")
-                    .Contains("INTERNET", StringComparison.OrdinalIgnoreCase));
+                .Contains("INTERNET", StringComparison.OrdinalIgnoreCase));
         var wanV4 = internetWan is null ? null : EmbeddedJsParser.Str(internetWan.GetValueOrDefault("IPv4IPAddress"));
 
         // WAN IPv6: best-effort fetch from the IPv6 include.
@@ -82,7 +84,10 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
                 .Select(r => EmbeddedJsParser.Str(r.GetValueOrDefault("IPAddress")))
                 .FirstOrDefault(ip => !string.IsNullOrEmpty(ip));
         }
-        catch { /* IPv6 status is optional */ }
+        catch
+        {
+            /* IPv6 status is optional */
+        }
 
         return new RouterOverview(firmware, wanV4, wanV6, uptime, product);
     }
@@ -105,9 +110,9 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
             //              DeviceType,UserDevAlias,UserSpecifiedDeviceType,LeaseTimeRemaining)
             ["USERDevice"] = new[]
             {
-                "Domain","IpAddr","MacAddr","Port","IpType","DevType","DevStatus",
-                "PortType","Time","HostName","IPv4Enabled","IPv6Enabled",
-                "DeviceType","UserDevAlias","UserSpecifiedDeviceType","LeaseTimeRemaining"
+                "Domain", "IpAddr", "MacAddr", "Port", "IpType", "DevType", "DevStatus",
+                "PortType", "Time", "HostName", "IPv4Enabled", "IPv6Enabled",
+                "DeviceType", "UserDevAlias", "UserSpecifiedDeviceType", "LeaseTimeRemaining"
             }
         };
 
@@ -135,6 +140,7 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
                 OnlineDuration: NullIfDash(EmbeddedJsParser.Str(d.GetValueOrDefault("Time"))),
                 LeaseTimeRemaining: NullIfDash(EmbeddedJsParser.Str(d.GetValueOrDefault("LeaseTimeRemaining")))));
         }
+
         return result;
     }
 
@@ -181,6 +187,7 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
                 PacketsSent: EmbeddedJsParser.Long(w.GetValueOrDefault("PacketsSent")),
                 PacketsReceived: EmbeddedJsParser.Long(w.GetValueOrDefault("PacketsReceived"))));
         }
+
         return result;
     }
 
@@ -207,6 +214,7 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
                 ServiceEnabled: EmbeddedJsParser.Bool(r.GetValueOrDefault("X_HW_ServiceEnable")),
                 RadioEnabled: EmbeddedJsParser.Bool(r.GetValueOrDefault("enable"))));
         }
+
         return result;
     }
 
@@ -243,13 +251,27 @@ public sealed class VodafoneRouterClient : IAsyncDisposable, IDisposable
 
     public async ValueTask DisposeAsync()
     {
-        try { await _session.LogoutAsync(CancellationToken.None).ConfigureAwait(false); } catch { }
+        try
+        {
+            await _session.LogoutAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        catch
+        {
+        }
+
         _session.Dispose();
     }
 
     public void Dispose()
     {
-        try { _session.LogoutAsync(CancellationToken.None).GetAwaiter().GetResult(); } catch { }
+        try
+        {
+            _session.LogoutAsync(CancellationToken.None).GetAwaiter().GetResult();
+        }
+        catch
+        {
+        }
+
         _session.Dispose();
     }
 }
