@@ -26,7 +26,14 @@ public partial class MainWindow : Window
 
     protected override async void OnClosed(EventArgs e)
     {
-        base.OnClosed(e);
-        await _viewModel.ShutdownAsync();
+        try
+        {
+            base.OnClosed(e);
+            await _viewModel.ShutdownAsync();
+        }
+        catch (Exception)
+        {
+            throw; // TODO handle exception
+        }
     }
 }
