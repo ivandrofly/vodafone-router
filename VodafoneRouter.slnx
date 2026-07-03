@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/samples/">
     <Project Path="samples/VodafoneRouter.Sample/VodafoneRouter.Sample.csproj" />
+    <Project Path="samples/VodafoneRouter.Wpf/VodafoneRouter.Wpf.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/VodafoneRouter.Client/VodafoneRouter.Client.csproj" />
